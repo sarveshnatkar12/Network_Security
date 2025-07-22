@@ -2,4 +2,4 @@
 NS-env
 
 #private
-.env
+/.env
