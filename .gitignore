@@ -1,2 +1,5 @@
 #environment
 NS-env
+
+#private
+.env
