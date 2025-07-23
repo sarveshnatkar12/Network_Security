@@ -5,4 +5,5 @@ pymango
 certifi
 pymongo[srv]
 pymango
+scikit-learn
 #-e .
