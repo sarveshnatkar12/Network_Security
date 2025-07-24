@@ -3,3 +3,6 @@ NS-env
 
 #private
 .env
+
+__pycache__/
+logs/
