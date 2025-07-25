@@ -118,6 +118,8 @@ class ModelTrainer:
             list(model_report.values()).index(best_model_score)
         ]
         best_model = models[best_model_name]
+        logging.info(f"Best Model Selected: {best_model_name}")
+        logging.info(f"Model Parameters: {best_model.get_params()}")
         y_train_pred=best_model.predict(X_train)
 
         classification_train_metric=get_classification_score(y_true=y_train,y_pred=y_train_pred)
