@@ -1,25 +1,19 @@
-from pymongo.mongo_client import MongoClient
+import os
+from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
-import os
+import certifi
 
-# Use full Windows path with raw string (to avoid escape sequences)
-load_dotenv(dotenv_path=r"C:\ENGINEERING PROJECTS\Network_Security\.env")
+load_dotenv()
+uri = os.getenv("MONGO_DB_URL")
 
-uri = os.getenv("MANGODB_DB_URL")
+print(f"✅ Loaded MONGO_URI: {uri}")
 
-if uri is None:
-    raise ValueError("❌ MONGO_URI not loaded. Check .env file and path.")
+# Use certifi's certificate file to avoid SSL issues
+client = MongoClient(uri, server_api=ServerApi('1'), tlsCAFile=certifi.where())
 
-print("✅ Loaded MONGO_URI:", uri)
-
-
-# Create a new client and connect to the server
-client = MongoClient(uri, server_api=ServerApi('1'))
-
-# Send a ping to confirm a successful connection
 try:
     client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
+    print("✅ Successfully connected to MongoDB Atlas")
 except Exception as e:
-    print(e)
+    print("❌ Connection failed:", e)
