@@ -25,10 +25,14 @@ from sklearn.ensemble import (
 )
 import mlflow
 from urllib.parse import urlparse
+import joblib
 
 import dagshub
+dagshub.init(repo_owner='sarveshnatkar12', repo_name='Network_Security', mlflow=True)
 
-
+# os.environ["MLFLOW_TRACKING_URI"]="https://dagshub.com/krishnaik06/networksecurity.mlflow"
+# os.environ["MLFLOW_TRACKING_USERNAME"]="krishnaik06"
+# os.environ["MLFLOW_TRACKING_PASSWORD"]="7104284f1bb44ece21e0e2adb4e36a250ae3251f"
 
 
 
@@ -42,23 +46,29 @@ class ModelTrainer:
         except Exception as e:
             raise NetworkSecurityException(e,sys)
         
-    def track_mlflow(self,best_model,classificationmetric):
-       
+    
 
-        with mlflow.start_run():
-            f1_score=classificationmetric.f1_score
-            precision_score=classificationmetric.precision_score
-            recall_score=classificationmetric.recall_score
+    def track_mlflow(self, best_model, classificationmetric):
+        try:
+            with mlflow.start_run():
+                f1_score = classificationmetric.f1_score
+                precision_score = classificationmetric.precision_score
+                recall_score = classificationmetric.recall_score
 
-            
+                # Log metrics
+                mlflow.log_metric("f1_score", f1_score)
+                mlflow.log_metric("precision", precision_score)
+                mlflow.log_metric("recall_score", recall_score)
 
-            mlflow.log_metric("f1_score",f1_score)
-            mlflow.log_metric("precision",precision_score)
-            mlflow.log_metric("recall_score",recall_score)
-            mlflow.sklearn.log_model(best_model,"model")
-            
+                # Save model using joblib (local file)
+                model_file_path = "model.pkl"
+                joblib.dump(best_model, model_file_path)
 
+                # Log as artifact (DagsHub compatible)
+                mlflow.log_artifact(model_file_path)
 
+        except Exception as e:
+            raise NetworkSecurityException(e, sys)
 
         
     def train_model(self,X_train,y_train,x_test,y_test):
@@ -113,7 +123,7 @@ class ModelTrainer:
         classification_train_metric=get_classification_score(y_true=y_train,y_pred=y_train_pred)
         
         ## Track the experiements with mlflow
-        
+        self.track_mlflow(best_model,classification_train_metric)
 
 
         y_test_pred=best_model.predict(x_test)
