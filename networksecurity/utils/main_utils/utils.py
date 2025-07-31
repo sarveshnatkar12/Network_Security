@@ -1,105 +1,96 @@
-import yaml
+import os, sys, yaml, numpy as np
+from joblib import dump, load
+from sklearn.model_selection import GridSearchCV
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.metrics import accuracy_score
 from networksecurity.exception.exception import NetworkSecurityException
 from networksecurity.logging.logger import logging
-import os,sys
-import numpy as np
-#import dill
-import pickle
-
-from sklearn.metrics import r2_score
-from sklearn.model_selection import GridSearchCV
 
 def read_yaml_file(file_path: str) -> dict:
     try:
-        with open(file_path, "rb") as yaml_file:
-            return yaml.safe_load(yaml_file)
-    except Exception as e:
-        raise NetworkSecurityException(e, sys) from e
-    
-def write_yaml_file(file_path: str, content: object, replace: bool = False) -> None:
-    try:
-        if replace:
-            if os.path.exists(file_path):
-                os.remove(file_path)
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, "w") as file:
-            yaml.dump(content, file)
+        with open(file_path,"rb") as f:
+            return yaml.safe_load(f)
     except Exception as e:
         raise NetworkSecurityException(e, sys)
-    
-def save_numpy_array_data(file_path: str, array: np.array):
-    """
-    Save numpy array data to file
-    file_path: str location of file to save
-    array: np.array data to save
-    """
+
+def write_yaml_file(file_path: str, content: object, replace: bool = False) -> None:
     try:
-        dir_path = os.path.dirname(file_path)
-        os.makedirs(dir_path, exist_ok=True)
-        with open(file_path, "wb") as file_obj:
-            np.save(file_obj, array)
+        if replace and os.path.exists(file_path):
+            os.remove(file_path)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w") as f:
+            yaml.dump(content, f)
     except Exception as e:
-        raise NetworkSecurityException(e, sys) from e
-    
+        raise NetworkSecurityException(e, sys)
+
+def save_numpy_array_data(file_path: str, array: np.array):
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "wb") as f:
+            np.save(f, array)
+    except Exception as e:
+        raise NetworkSecurityException(e, sys)
+
+def load_numpy_array_data(file_path: str) -> np.array:
+    try:
+        with open(file_path, "rb") as f:
+            return np.load(f)
+    except Exception as e:
+        raise NetworkSecurityException(e, sys)
+
 def save_object(file_path: str, obj: object) -> None:
     try:
-        logging.info("Entered the save_object method of MainUtils class")
+        logging.info(f"Saving object to {file_path}")
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        with open(file_path, "wb") as file_obj:
-            pickle.dump(obj, file_obj)
-        logging.info("Exited the save_object method of MainUtils class")
+        dump(obj, file_path)
     except Exception as e:
-        raise NetworkSecurityException(e, sys) from e
-    
-def load_object(file_path: str, ) -> object:
+        raise NetworkSecurityException(e, sys)
+
+def load_object(file_path: str) -> object:
     try:
         if not os.path.exists(file_path):
-            raise Exception(f"The file: {file_path} is not exists")
-        with open(file_path, "rb") as file_obj:
-            print(file_obj)
-            return pickle.load(file_obj)
+            raise FileNotFoundError(f"{file_path} not found")
+        return load(file_path)
     except Exception as e:
-        raise NetworkSecurityException(e, sys) from e
-    
-def load_numpy_array_data(file_path: str) -> np.array:
-    """
-    load numpy array data from file
-    file_path: str location of file to load
-    return: np.array data loaded
-    """
-    try:
-        with open(file_path, "rb") as file_obj:
-            return np.load(file_obj)
-    except Exception as e:
-        raise NetworkSecurityException(e, sys) from e
-    
+        raise NetworkSecurityException(e, sys)
 
-
-def evaluate_models(X_train, y_train,X_test,y_test,models,param):
+def evaluate_models(X_train, y_train, X_test, y_test, models: dict, params: dict) -> dict:
+    """
+    For each model:
+     - runs GridSearchCV(cv=5, scoring='accuracy')
+     - refits on full train set
+     - returns dict:
+         { model_name: {'train_score': <acc>, 'test_score': <acc>} }
+    """
     try:
         report = {}
+        for name, model in models.items():
+            grid = params.get(name, {})
+            gs = GridSearchCV(
+                estimator=model,
+                param_grid=grid,
+                cv=5,
+                scoring="accuracy",
+                n_jobs=-1,
+            )
+            gs.fit(X_train, y_train)
 
-        for i in range(len(list(models))):
-            model = list(models.values())[i]
-            para=param[list(models.keys())[i]]
+            # best = gs.best_estimator_
+            best = CalibratedClassifierCV(gs.best_estimator_, method='sigmoid', cv=3)
+            # re-fit on entire training data
+            best.fit(X_train, y_train)
 
-            gs = GridSearchCV(model,para,cv=3)
-            gs.fit(X_train,y_train)
+            y_train_pred = best.predict(X_train)
+            y_test_pred  = best.predict(X_test)
 
-            model.set_params(**gs.best_params_)
-            model.fit(X_train,y_train)
+            train_acc = accuracy_score(y_train, y_train_pred)
+            test_acc  = accuracy_score(y_test,  y_test_pred)
 
-            #model.fit(X_train, y_train)  # Train model
-
-            y_train_pred = model.predict(X_train)
-
-            y_test_pred = model.predict(X_test)
-
-            train_model_score = r2_score(y_train, y_train_pred)
-
-            test_model_score = r2_score(y_test, y_test_pred)
-
-            report[list(models.keys())[i]] = test_model_score
+            report[name] = {
+                "train_score": train_acc,
+                "test_score":  test_acc,
+                "best_estimator": best
+            }
 
         return report
 

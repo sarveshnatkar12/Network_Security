@@ -1,21 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Data Table</title>
+  <title>Prediction Output</title>
   <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h2 { color: #444; }
+    ul { color: red; }
     table {
       border-collapse: collapse;
       width: 100%;
     }
     th, td {
-      border: 1px solid black;
+      border: 1px solid #aaa;
       padding: 8px;
       text-align: left;
     }
   </style>
 </head>
 <body>
-  <h2>Predicted Data</h2>
-  {{ table | safe }}
+  {% if result %}
+    <h2>{{ result }}</h2>
+    {% if reasons %}
+      <h3>⚠️ Reasons flagged:</h3>
+      <ul>
+        {% for reason in reasons %}
+          <li>{{ reason }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endif %}
+
+  {% if table %}
+    <h2>Predicted Data</h2>
+    {{ table | safe }}
+  {% endif %}
 </body>
 </html>

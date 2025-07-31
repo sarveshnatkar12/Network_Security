@@ -3,6 +3,7 @@ from networksecurity.logging.logger import logging
 
 
 ## configuration of the Data Ingestion Config
+
 from networksecurity.entity.config_entity import DataIngestionConfig
 from networksecurity.entity.artifact_entity import DataIngestionArtifact
 import os
@@ -13,10 +14,10 @@ import pymongo
 from typing import List
 from sklearn.model_selection import train_test_split
 from dotenv import load_dotenv
-load_dotenv(dotenv_path=r"C:\ENGINEERING PROJECTS\Network_Security\.env")
-
+load_dotenv()
 
 MONGO_DB_URL=os.getenv("MONGO_DB_URL")
+
 
 class DataIngestion:
     def __init__(self,data_ingestion_config:DataIngestionConfig):
@@ -85,6 +86,7 @@ class DataIngestion:
             
         except Exception as e:
             raise NetworkSecurityException(e,sys)
+        
         
     def initiate_data_ingestion(self):
         try:
