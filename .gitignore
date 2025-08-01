@@ -4,5 +4,11 @@ NS-env-new
 #private
 .env
 
-__pycache__/
+# Ignore logs
 logs/
+*.log
+
+valid_data/
+prediction_output/
+
+mlruns/

@@ -17,6 +17,7 @@
       padding: 30px 40px;
       border-radius: 16px;
       box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+      position: relative;
     }
 
     h1 {
@@ -45,7 +46,7 @@
       margin-bottom: 30px;
     }
 
-    .check-button, .reset-button {
+    .check-button, .reset-button, .train-button {
       border: none;
       border-radius: 8px;
       padding: 10px 20px;
@@ -73,10 +74,26 @@
       background-color: #c0392b;
     }
 
+    .train-button {
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      background-color: #3498db;
+      color: white;
+    }
+
+    .train-button:hover {
+      background-color: #2c80b4;
+    }
+
+    #spinner {
+      text-align: center;
+      margin-top: 15px;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
-      max-width: 100%;
       margin-top: 10px;
     }
 
@@ -84,14 +101,11 @@
       border: 1px solid #aaa;
       padding: 10px;
       text-align: left;
+      word-break: break-word;
     }
 
     th {
       background: #f0f0f0;
-    }
-
-    td {
-      word-break: break-word;
     }
 
     .phishing-row {
@@ -125,22 +139,41 @@
       color: #f8f8f8;
     }
 
-    /* Hide results on reset */
     #result-container.hidden {
       display: none;
     }
-
   </style>
 
   <script>
     function resetForm() {
       document.getElementById('url').value = '';
-      document.getElementById('result-container').classList.add('hidden');
+      const result = document.getElementById('result-container');
+      if (result) {
+        result.classList.add('hidden');
+      }
+    }
+
+    async function triggerTraining() {
+      const spinner = document.getElementById("spinner");
+      spinner.style.display = "block";
+      alert("🚀 Training has started. Please wait...");
+
+      try {
+        const res = await fetch('/train');
+        const text = await res.text();
+        spinner.style.display = "none";
+        alert("✅ Model training complete!\n📁 Artifacts synced to S3.\n\n" + text);
+      } catch (err) {
+        spinner.style.display = "none";
+        alert("❌ Error during training:\n" + err);
+      }
     }
   </script>
 </head>
 <body>
   <div class="container">
+    <button class="train-button" onclick="triggerTraining()">🚀 Train Model</button>
+
     <h1>🔍 Check URL(s) for Phishing</h1>
 
     <form method="post" action="/predict-url" onreset="resetForm()">
@@ -152,6 +185,12 @@
         <button type="reset" class="reset-button">Reset</button>
       </div>
     </form>
+
+    <!-- Spinner while training -->
+    <div id="spinner" style="display:none;">
+      <img src="https://i.gifer.com/YCZH.gif" width="60" alt="Loading..." />
+      <p style="color:#3498db; font-weight:bold;">Training in progress...</p>
+    </div>
 
     {% if results %}
     <div id="result-container">

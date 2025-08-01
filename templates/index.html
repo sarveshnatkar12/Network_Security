@@ -9,6 +9,7 @@
       color: white;
       text-align: center;
       padding: 60px;
+      margin: 0;
     }
     h1 {
       font-size: 3em;
@@ -33,13 +34,18 @@
     .start-button:hover {
       background-color: #16a085;
     }
+
   </style>
 </head>
 <body>
   <h1>🔐 Network Security: Phishing URL Detection</h1>
   <p>
-     This project helps users determine whether a given URL is safe or potentially a phishing attempt. Powered by a machine learning model trained on a wide range of technical and behavioral features extracted from the URL structure and content, it provides real-time classification along with an estimated risk probability. The system aims to assist users in staying safe online by offering a fast and informative assessment of suspicious web links.
+    This project helps you detect whether a URL is legitimate or potentially a phishing website.
+    Powered by a Machine Learning model trained on multiple behavioral, structural, and network-based features,
+    it offers real-time classification with helpful security insights.
   </p>
+
+  <!-- ✅ Predict Button -->
   <form action="/check-url-form">
     <button class="start-button">Start Checking URLs</button>
   </form>

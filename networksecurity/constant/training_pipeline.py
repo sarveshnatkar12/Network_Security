@@ -72,4 +72,4 @@ MODEL_TRAINER_OVER_FIITING_UNDER_FITTING_THRESHOLD: float = 0.05
 # Threshold used during prediction for classifying as phishing
 CLASSIFICATION_THRESHOLD: float = 0.35 
 
-TRAINING_BUCKET_NAME = "netwworksecurity"
+TRAINING_BUCKET_NAME = "phishingnetworksecurity"
