@@ -135,4 +135,4 @@ async def post_url_form(request: Request, url: str = Form(...)):
 
 # ====================== START APP ====================== #
 if __name__ == "__main__":
-    app_run(app, host="localhost", port=8120)
+    app_run(app, host='0.0.0.0', port=8120)
