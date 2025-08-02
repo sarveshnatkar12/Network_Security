@@ -68,30 +68,6 @@ Users can:
 
 ---
 
-## 🗃️ Folder Structure (Simplified)
-
-Network_Security/
-│
-├── networksecurity/
-│ ├── components/ # ingestion, validation, transformation, training
-│ ├── entity/ # config & artifact dataclasses
-│ ├── constant/ # schema and pipeline constants
-│ ├── cloud/ # S3 sync helper
-│ ├── pipeline/ # training_pipeline.py
-│ ├── utils/ # yaml, pickle, metric, estimator
-│ ├── logging/, exception/ # custom logging & exception handling
-│
-├── templates/ # HTML templates for UI
-├── Dockerfile # Docker setup
-├── app.py # FastAPI app
-├── push_data.py # Script to insert data into MongoDB
-├── main.py # Pipeline starter
-├── requirements.txt
-└── .env # MongoDB URI + secrets
-
-
----
-
 ## 🚀 Deployment
 
 ### 🔧 Local Docker Build & Run
@@ -154,4 +130,5 @@ Sarvesh Natkar
 
 🧠 Final Note
 This project showcases an end-to-end ML pipeline that connects data collection, processing, modeling, and real-time deployment into a single, scalable solution — built for interviews, portfolios, and real-world ML applications.
+
 
